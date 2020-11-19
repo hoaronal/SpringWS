@@ -12,7 +12,9 @@ import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -35,38 +37,27 @@ public class WebSocketMessageHandler  implements WebSocketHandler, SubProtocolCa
         log.info("payloadLength:" + webSocketMessage.getPayloadLength());
         log.info("isLast:" + webSocketMessage.isLast());
 
-        ByteBuffer byteBuffer;
-        /*if (webSocketMessage instanceof TextMessage) {
+        ByteBuffer byteBuffer = null;
+        if (webSocketMessage instanceof TextMessage) {
             byteBuffer = ByteBuffer.wrap(((TextMessage) webSocketMessage).asBytes());
         } else {
-            byteBuffer = ((BinaryMessage) webSocketMessage).getPayload();
+            try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+                List<DataModel.DataMessage> dataMessages = new ArrayList<>();
+                for (int i = 0; i < 100; i++) {
+                    DataModel.DataMessage dataMsg = DataModel.DataMessage.newBuilder().setAddress("Đông Anh - Hà Nội - " + i).setName("Quang Hòa - " + i).build();
+                    dataMessages.add(dataMsg);
+                    dataMsg.writeTo(byteArrayOutputStream);
 
-            if (WSConstants.PROTOCOL_SAMPLE.equals(webSocketSession.getAcceptedProtocol())) {
-                WebSocketSampleProto.Sample sampleProto = WebSocketSampleProto.Sample.parseFrom(byteBuffer.array());
-                log.info("sampleProto.getName():" + sampleProto.getName());
-                WebSocketSampleProto.Sample newSampleProto = WebSocketSampleProto.Sample.newBuilder()
-                        .setName(sampleProto + ".....server")
-                        .build();
-
-                try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-                    newSampleProto.writeTo(byteArrayOutputStream);
-                    byte[] serialized = byteArrayOutputStream.toByteArray();
-                    byteBuffer = ByteBuffer.wrap(serialized);
-                } catch (Exception e) {
-                    throw e;
                 }
+                ObjectOutputStream oos = new ObjectOutputStream(byteArrayOutputStream);
+                oos.writeObject(dataMessages);
+                byte[] serialized = byteArrayOutputStream.toByteArray();
+                byteBuffer = ByteBuffer.wrap(serialized);
+            } catch (Exception e) {
+                throw e;
             }
-        }*/
-        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-            for (int i = 0; i > 100; i++) {
-                DataModel.DataMessage dataMsg = DataModel.DataMessage.newBuilder().setAddress("Đông Anh - Hà Nội - " + i).setName("Quang Hòa - " + i).build();
-                dataMsg.writeTo(byteArrayOutputStream);
-            }
-            byte[] serialized = byteArrayOutputStream.toByteArray();
-            byteBuffer = ByteBuffer.wrap(serialized);
-        } catch (Exception e) {
-            throw e;
         }
+
         WebSocketMessage msg = new BinaryMessage(byteBuffer.array());
         webSocketSession.sendMessage(msg);
     }
