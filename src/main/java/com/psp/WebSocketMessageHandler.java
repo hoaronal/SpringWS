@@ -35,20 +35,18 @@ public class WebSocketMessageHandler  implements WebSocketHandler, SubProtocolCa
         log.info("payload:" + webSocketMessage.getPayload());
         log.info("payloadLength:" + webSocketMessage.getPayloadLength());
         log.info("isLast:" + webSocketMessage.isLast());
+        DataModel.DataMessageList.Builder builder = DataModel.DataMessageList.newBuilder();
+
+
 
         ByteBuffer byteBuffer = null;
         if (webSocketMessage instanceof TextMessage) {
             byteBuffer = ByteBuffer.wrap(((TextMessage) webSocketMessage).asBytes());
         } else {
             try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-                List<DataModel.DataMessage> dataMessages = new ArrayList<>();
-                DataModel.DataMessageList.Builder builder = DataModel.DataMessageList.newBuilder();
-                for (int i = 0; i < 100; i++) {
+                for (int i = 1; i < 100; i++) {
                     DataModel.DataMessage dataMsg = DataModel.DataMessage.newBuilder().setId(i).setAddress("Đông Anh - Hà Nội - " + i).setName("Quang Hòa - " + i).build();
-                    dataMessages.add(dataMsg);
-                    builder.setPacket(i, dataMsg);
-                    dataMsg.writeTo(byteArrayOutputStream);
-
+                    builder.addPacket(dataMsg);
                 }
                 ObjectOutputStream oos = new ObjectOutputStream(byteArrayOutputStream);
                 DataModel.DataMessageList dataMessageList1 = builder.build();
