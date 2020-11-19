@@ -57,9 +57,9 @@ public class WebSocketMessageHandler  implements WebSocketHandler, SubProtocolCa
                 }
             }
         }*/
-        DataModel.DataMessage dataMsg = DataModel.DataMessage.newBuilder().setAddress("Đông Anh - Hà Nội").setName("Quang Hòa").build();
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-            for (int i = 0; i > 10; i++) {
+            for (int i = 0; i > 100; i++) {
+                DataModel.DataMessage dataMsg = DataModel.DataMessage.newBuilder().setAddress("Đông Anh - Hà Nội - " + i).setName("Quang Hòa - " + i).build();
                 dataMsg.writeTo(byteArrayOutputStream);
             }
             byte[] serialized = byteArrayOutputStream.toByteArray();
