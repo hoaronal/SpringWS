@@ -2,7 +2,6 @@ package com.psp;
 
 import com.psp.protobuf.DataModel;
 import lombok.extern.slf4j.Slf4j;
-import com.psp.protobuf.WebSocketSampleProto;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.SubProtocolCapable;
@@ -43,14 +42,17 @@ public class WebSocketMessageHandler  implements WebSocketHandler, SubProtocolCa
         } else {
             try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
                 List<DataModel.DataMessage> dataMessages = new ArrayList<>();
+                DataModel.DataMessageList.Builder builder = DataModel.DataMessageList.newBuilder();
                 for (int i = 0; i < 100; i++) {
-                    DataModel.DataMessage dataMsg = DataModel.DataMessage.newBuilder().setAddress("Đông Anh - Hà Nội - " + i).setName("Quang Hòa - " + i).build();
+                    DataModel.DataMessage dataMsg = DataModel.DataMessage.newBuilder().setId(i).setAddress("Đông Anh - Hà Nội - " + i).setName("Quang Hòa - " + i).build();
                     dataMessages.add(dataMsg);
+                    builder.setPacket(i, dataMsg);
                     dataMsg.writeTo(byteArrayOutputStream);
 
                 }
                 ObjectOutputStream oos = new ObjectOutputStream(byteArrayOutputStream);
-                oos.writeObject(dataMessages);
+                DataModel.DataMessageList dataMessageList1 = builder.build();
+                oos.writeObject(dataMessageList1);
                 byte[] serialized = byteArrayOutputStream.toByteArray();
                 byteBuffer = ByteBuffer.wrap(serialized);
             } catch (Exception e) {
