@@ -39,9 +39,11 @@ public class WebSocketMessageHandler  implements WebSocketHandler, SubProtocolCa
 
 
 
-        ByteBuffer byteBuffer = null;
+        ByteBuffer byteBuffer;
+        WebSocketMessage msg;
         if (webSocketMessage instanceof TextMessage) {
             byteBuffer = ByteBuffer.wrap(((TextMessage) webSocketMessage).asBytes());
+            msg = new BinaryMessage(byteBuffer.array());
         } else {
             try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
                 for (int i = 1; i < 100; i++) {
@@ -50,15 +52,14 @@ public class WebSocketMessageHandler  implements WebSocketHandler, SubProtocolCa
                 }
                 ObjectOutputStream oos = new ObjectOutputStream(byteArrayOutputStream);
                 DataModel.DataMessageList dataMessageList1 = builder.build();
+
                 oos.writeObject(dataMessageList1);
-                byte[] serialized = byteArrayOutputStream.toByteArray();
-                byteBuffer = ByteBuffer.wrap(serialized);
+                msg = new BinaryMessage(dataMessageList1.toByteArray());
             } catch (Exception e) {
                 throw e;
             }
         }
 
-        WebSocketMessage msg = new BinaryMessage(byteBuffer.array());
         webSocketSession.sendMessage(msg);
     }
 

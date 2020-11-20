@@ -8,9 +8,11 @@ option java_package = "com.psp";
 option java_outer_classname = "DataModel";
 // [END java_declaration]
 
+// [START DataMessageList]
 message DataMessageList {
     repeated DataMessage packet = 1;
 }
+// [END DataMessageList]
 
 // [START messages]
 message DataMessage {
